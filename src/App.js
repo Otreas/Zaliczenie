@@ -1,26 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Navbar, Nav, Button } from 'react-bootstrap';
+import "bootstrap/dist/css/bootstrap.css"
 import QuestionForm from './components/QuestionForm';
 import QuestionList from './components/QuestionList';
 import QuizMode from './components/QuizMode';
 
 const App = () => {
-  const [questions, setQuestions] = useState([]);
-  const [view, setView] = useState('creator'); // 'creator' lub 'student'
 
-  //Wczytywanie LocalStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('quiz-data');
-    if (saved) {
-      setQuestions(JSON.parse(saved));
-    }
-  }, []);
+  const [questions, setQuestions] = useState(() => {
+      const saved = localStorage.getItem('quiz-data');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Błąd parsowania JSON:", e);
+          return [];
+        }
+      }
+      return [];
+    });
+  const [view, setView] = useState('creator'); // 'creator' lub 'student'
 
   //Zapis LocalStorage
   useEffect(() => {
     localStorage.setItem('quiz-data', JSON.stringify(questions));
   }, [questions]);
-  
+
   const addQuestion = (newQuestion) => {
     setQuestions([...questions, newQuestion]);
   };
