@@ -1,26 +1,62 @@
-import logo from './logo.svg';
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect } from 'react';
+import { Container, Navbar, Nav, Button } from 'react-bootstrap';
+import QuestionForm from './components/QuestionForm';
+import QuestionList from './components/QuestionList';
+import QuizMode from './components/QuizMode';
 
-function App() {
+const App = () => {
+  const [questions, setQuestions] = useState([]);
+  const [view, setView] = useState('creator'); // 'creator' lub 'student'
+
+  //Wczytywanie LocalStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('quiz-data');
+    if (saved) {
+      setQuestions(JSON.parse(saved));
+    }
+  }, []);
+
+  //Zapis LocalStorage
+  useEffect(() => {
+    localStorage.setItem('quiz-data', JSON.stringify(questions));
+  }, [questions]);
+  
+  const addQuestion = (newQuestion) => {
+    setQuestions([...questions, newQuestion]);
+  };
+
+  const deleteQuestion = (id) => {
+    setQuestions(questions.filter(q => q.id !== id));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Navbar bg="dark" variant="dark" expand="lg">
+        <Container>
+          <Navbar.Brand>Generator Testów</Navbar.Brand>
+          <Nav className="ms-auto">
+            <Button variant={view === 'creator' ? "primary" : "outline-light"} onClick={() => setView('creator')} className="me-2">Edytor</Button>
+            <Button variant={view === 'student' ? "success" : "outline-light"} onClick={() => setView('student')}>Rozwiąż Test</Button>
+          </Nav>
+        </Container>
+      </Navbar>
+
+      <Container className="mt-4">
+        {view === 'creator' ? (
+          <div className="row">
+            <div className="col-md-5">
+              <QuestionForm onAdd={addQuestion} />
+            </div>
+            <div className="col-md-7">
+              <QuestionList questions={questions} onDelete={deleteQuestion} />
+            </div>
+          </div>
+        ) : (
+          <QuizMode questions={questions} />
+        )}
+      </Container>
+    </>
   );
-}
+};
 
 export default App;
